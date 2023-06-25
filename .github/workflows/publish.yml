@@ -49,7 +49,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pnpm exec electron-builder -- --publish never --mac --win --linux
+          pnpm exec electron-builder -- --publish never --mac
+          pnpm exec electron-builder -- --publish never --win
+          pnpm exec electron-builder -- --publish never --linux
+          ls -la release/build
 
       - uses: ncipollo/release-action@v1
         with:
