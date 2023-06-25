@@ -2,8 +2,8 @@ name: Publish
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - '*'
 
 jobs:
   publish:
@@ -49,13 +49,18 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pnpm exec electron-builder -- --publish never --mac
-          pnpm exec electron-builder -- --publish never --win
-          pnpm exec electron-builder -- --publish never --linux
+          pnpm exec electron-builder --mac
+          pnpm exec electron-builder --win
+          pnpm exec electron-builder --linux
           ls -la release/build
+      - name: JSON to variables
+        uses: antifree/json-to-variables@v1.0.1
+        with:
+          filename: 'package.json'
+          prefix: 'package'
 
       - uses: ncipollo/release-action@v1
         with:
           artifacts: 'release/build/*.exe,release/build/*.dmg,release/build/*.AppImage,release/build/latest-linux.yml,release/build/latest-mac.yml,release/build/latest.yml,release/build/*.blockmap,release/build/*.zip'
           commit: 'main'
-          tag: 'v0.0.1'
+          tag: ${{ env.package_version }}
