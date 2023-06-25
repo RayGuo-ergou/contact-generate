@@ -7,10 +7,6 @@ on:
 
 jobs:
   publish:
-    # To enable auto publishing to github, update your electron publisher
-    # config in package.json > "build" and remove the conditional below
-    if: ${{ github.repository_owner == 'electron-react-boilerplate' }}
-
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -21,17 +17,17 @@ jobs:
       - name: Checkout git repo
         uses: actions/checkout@v3
 
-      - name: Install Node and NPM
-        uses: actions/setup-node@v3
+      - uses: pnpm/action-setup@v2.2.4
+        name: install pnpm
+        id: pnpm-install
         with:
-          node-version: 18
-          cache: npm
+          version: 8.6.3
 
       - name: Install and build
         run: |
-          npm install
-          npm run postinstall
-          npm run build
+          pnpm install
+          pnpm run postinstall
+          pnpm run build
 
       - name: Publish releases
         env:
@@ -43,4 +39,4 @@ jobs:
           # This is used for uploading release assets to github
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          npm exec electron-builder -- --publish always --win --mac --linux
+          pnpm exec electron-builder -- --publish always --win --mac --linux
