@@ -23,6 +23,20 @@ jobs:
         with:
           version: 8.6.3
 
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Cache pnpm store
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
       - name: Install and build
         run: |
           pnpm install
@@ -33,4 +47,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pnpm exec electron-builder -- --publish always --win --linux
+          pnpm exec electron-builder -- --publish never --mac --win --linux
+
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: 'release/build/*.exe,release/build/*.dmg,release/build/*.AppImage'
+          commit: 'main'
+          tag: ${{ github.ref }}
